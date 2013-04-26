@@ -18,7 +18,6 @@ def normalize(string, sub_table=None):
 
     # with our substitution table powers combined, we have the power!!!!
     stable = {}
-    global substitution_table
     if sub_table is not None:
         stable.update(substitution_table)
         stable.update(sub_table)
