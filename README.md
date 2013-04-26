@@ -7,8 +7,8 @@ either a `u` or an `umlat` to be used (since the `u` wouldn't be changed and the
 be changed to the `u`) so you can search both ways but only have to store one version.
 
 There are other modules that help with this, but python's builtin `unicodedata` didn't quite
-do what I needed since it only uses defined (normalizations)[http://en.wikipedia.org/wiki/Unicode_normalization],
-and something like (unidecode)[https://pypi.python.org/pypi/Unidecode] work
+do what I needed since it only uses defined [normalizations](http://en.wikipedia.org/wiki/Unicode_normalization),
+and something like [unidecode](https://pypi.python.org/pypi/Unidecode) work
 but get rid of unicode chars they don't recognize. I wanted to keep unicode that there wasn't
 a good substitution for, likewise, I didn't really want to turn chinese characters into english
 either (something `unidecode` does).
