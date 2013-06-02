@@ -3,7 +3,9 @@
 module for making certain substitutions of unicode characters to ascii equivalents
 """
 
-def normalize(string, sub_table=None):
+__version__ = '0.2'
+
+def normalize_with_count(string, sub_table=None):
     '''
     normalize a unicode string, replacing recognized chars with substitutions and
     leaving the rest untouched
@@ -11,7 +13,7 @@ def normalize(string, sub_table=None):
     string -- unicode -- the input (must be unicode)
     sub_table -- dict -- {unicode: unicode} if you want to override or add to the default substitutions
 
-    return -- unicode -- the string with substitutions if any were found
+    return -- tuple -- (unicode, integer), the string with substitutions if any were found and a count of subs made
     '''
     if not isinstance(string, unicode):
         raise UnicodeError("expected string to be a unicode string")
@@ -25,10 +27,551 @@ def normalize(string, sub_table=None):
         stable = substitution_table
 
     chars = []
+    count_subs = 0
     for char in string:
-        chars.append(stable[char] if (char in stable) else char)
+        if char in stable:
+            count_subs += 1
+            char = stable[char]
 
-    return u''.join(chars)
+        chars.append(char)
+
+    return u''.join(chars), count_subs
+
+def normalize(string, sub_table=None):
+    '''
+    normalize a unicode string, replacing recognized chars with substitutions and
+    leaving the rest untouched
+
+    string -- unicode -- the input (must be unicode)
+    sub_table -- dict -- {unicode: unicode} if you want to override or add to the default substitutions
+
+    return -- unicode -- the string with substitutions if any were found
+    '''
+    string, _ = normalize_with_count(string, sub_table)
+    return string
+
+
+substitution_table = {
+    u'\u00B2': u'2', # SUPERSCRIPT TWO
+    u'\u00B3': u'3', # SUPERSCRIPT THREE
+    u'\u00B4': u"'", # ACUTE ACCENT
+    u'\u00B5': u'u', # MICRO SIGN
+    u'\u00B9': u'1', # SUPERSCRIPT ONE
+    u'\u00BA': u'o', # MASCULINE ORDINAL INDICATOR
+    u'\u00BB': u'"', # RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK
+    u'\u00BC': u'1/4', # VULGAR FRACTION ONE QUARTER
+    u'\u00BD': u'1/2', # VULGAR FRACTION ONE HALF
+    u'\u00BE': u'3/4', # VULGAR FRACTION THREE QUARTERS
+    u'\u2010': u'-', # HYPHEN
+    u'\u2011': u'-', # NON-BREAKING HYPHEN
+    u'\u2012': u'-', # FIGURE DASH
+    u'\u2013': u'-', # EN DASH
+    u'\u2014': u'-', # EM DASH
+    u'\u2015': u'--', # HORIZONTAL BAR
+    u'\u2016': u'', # DOUBLE VERTICAL LINE
+    u'\u2017': u'_', # DOUBLE LOW LINE
+    u'\u2018': u"'", # LEFT SINGLE QUOTATION MARK
+    u'\u2019': u"'", # RIGHT SINGLE QUOTATION MARK
+    u'\u201A': u',', # SINGLE LOW-9 QUOTATION MARK
+    u'\u201B': u"'", # SINGLE HIGH-REVERSED-9 QUOTATION MARK
+    u'\u201C': u'"', # LEFT DOUBLE QUOTATION MARK
+    u'\u201D': u'"', # RIGHT DOUBLE QUOTATION MARK
+    u'\u201E': u'"', # DOUBLE LOW-9 QUOTATION MARK
+    u'\u201F': u'"', # DOUBLE HIGH-REVERSED-9 QUOTATION MARK
+    u'\u2024': u'.', # ONE DOT LEADER
+    u'\u2025': u'..', # TWO DOT LEADER
+    u'\u2026': u'...', # HORIZONTAL ELLIPSIS
+    u'\u202F': u' ', # NARROW NO-BREAK SPACE
+    u'\u2030': u'0/00', # PER MILLE SIGN
+    u'\u2031': u'0/000', # PER TEN THOUSAND SIGN
+    u'\u2032': u"'", # PRIME
+    u'\u2033': u'"', # DOUBLE PRIME
+    u'\u2034': u"'''", # TRIPLE PRIME
+    u'\u2035': u'`', # REVERSED PRIME
+    u'\u2036': u'"', # REVERSED DOUBLE PRIME
+    u'\u2037': u"'''", # REVERSED TRIPLE PRIME
+    u'\u2038': u'^', # CARET
+    u'\u2039': u'<', # SINGLE LEFT-POINTING ANGLE QUOTATION MARK
+    u'\u203A': u'>', # SINGLE RIGHT-POINTING ANGLE QUOTATION MARK
+    u'\u203C': u'!!', # DOUBLE EXCLAMATION MARK
+    u'\u203D': u'?', # INTERROBANG
+    u'\u2044': u'/', # FRACTION SLASH
+    u'\u2045': u'[', # LEFT SQUARE BRACKET WITH QUILL
+    u'\u2046': u']', # RIGHT SQUARE BRACKET WITH QUILL
+    u'\u2047': u'??', # DOUBLE QUESTION MARK
+    u'\u2048': u'?!', # QUESTION EXCLAMATION MARK
+    u'\u2049': u'!?', # EXCLAMATION QUESTION MARK
+    u'\u204E': u'*', # LOW ASTERISK
+    u'\u2052': u'%', # COMMERCIAL MINUS SIGN
+    u'\u2053': u'~', # SWUNG DASH
+    u'\u2056': u'...', # THREE DOT PUNCTUATION
+    u'\u2057': u"''''", # QUADRUPLE PRIME
+    u'\u2058': u'....', # FOUR DOT PUNCTUATION
+    u'\u2059': u'.....', # FIVE DOT PUNCTUATION
+    u'\u205A': u'..', # TWO DOT PUNCTUATION
+    u'\u205F': u' ', # MEDIUM MATHEMATICAL SPACE
+    u'\u2100': u'a/c', # ACCOUNT OF
+    u'\u2101': u'a/s', # ADDRESSED TO THE SUBJECT
+    u'\u2102': u'C', # DOUBLE-STRUCK CAPITAL C
+    u'\u2103': u'C', # DEGREE CELSIUS
+    u'\u2105': u'c/o', # CARE OF
+    u'\u2106': u'c/u', # CADA UNA
+    u'\u2107': u'E', # EULER CONSTANT
+    u'\u2109': u'F', # DEGREE FAHRENHEIT
+    u'\u210A': u'g', # SCRIPT SMALL G
+    u'\u210B': u'H', # SCRIPT CAPITAL H
+    u'\u210C': u'H', # BLACK-LETTER CAPITAL H
+    u'\u210D': u'H', # DOUBLE-STRUCK CAPITAL H
+    u'\u210E': u'h', # PLANCK CONSTANT
+    u'\u210F': u'h', # PLANCK CONSTANT OVER TWO PI
+    u'\u2110': u'I', # SCRIPT CAPITAL I
+    u'\u2111': u'I', # BLACK-LETTER CAPITAL I
+    u'\u2112': u'L', # SCRIPT CAPITAL L
+    u'\u2113': u'l', # SCRIPT SMALL L
+    u'\u2115': u'N', # DOUBLE-STRUCK CAPITAL N
+    u'\u2116': u'No', # NUMERO SIGN
+    u'\u2117': u'(p)', # SOUND RECORDING COPYRIGHT
+    u'\u2118': u'P', # SCRIPT CAPITAL P
+    u'\u2119': u'P', # DOUBLE-STRUCK CAPITAL P
+    u'\u211A': u'Q', # DOUBLE-STRUCK CAPITAL Q
+    u'\u211B': u'R', # SCRIPT CAPITAL R
+    u'\u211C': u'R', # BLACK-LETTER CAPITAL R
+    u'\u211D': u'R', # DOUBLE-STRUCK CAPITAL R
+    u'\u211E': u'Px', # PRESCRIPTION TAKE
+    u'\u2120': u'SM', # SERVICE MARK
+    u'\u2121': u'TEL', # TELEPHONE SIGN
+    u'\u2122': u'TM', # TRADE MARK SIGN
+    u'\u2124': u'Z', # DOUBLE-STRUCK CAPITAL Z
+    u'\u2126': u'Omega', # OHM SIGN
+    u'\u2128': u'Z', # BLACK-LETTER CAPITAL Z
+    u'\u2129': u'iota', # TURNED GREEK SMALL LETTER IOTA
+    u'\u212A': u'K', # KELVIN SIGN
+    u'\u212B': u'A', # ANGSTROM SIGN
+    u'\u212C': u'B', # SCRIPT CAPITAL B
+    u'\u212D': u'C', # BLACK-LETTER CAPITAL C
+    u'\u212E': u'e', # ESTIMATED SYMBOL
+    u'\u212F': u'e', # SCRIPT SMALL E
+    u'\u2130': u'E', # SCRIPT CAPITAL E
+    u'\u2131': u'F', # SCRIPT CAPITAL F
+    u'\u2132': u'F', # TURNED CAPITAL F
+    u'\u2133': u'M', # SCRIPT CAPITAL M
+    u'\u2134': u'o', # SCRIPT SMALL O
+    u'\u2139': u'i', # INFORMATION SOURCE
+    u'\u213A': u'Q', # ROTATED CAPITAL Q
+    u'\u213B': u'FAX', # FACSIMILE SIGN
+    u'\u213C': u'pi', # DOUBLE-STRUCK SMALL PI
+    u'\u213D': u'gamma', # DOUBLE-STRUCK SMALL GAMMA
+    u'\u213E': u'Gamma', # DOUBLE-STRUCK CAPITAL GAMMA
+    u'\u213F': u'PI', # DOUBLE-STRUCK CAPITAL PI
+    u'\u2141': u'G', # TURNED SANS-SERIF CAPITAL G
+    u'\u2142': u'L', # TURNED SANS-SERIF CAPITAL L
+    u'\u2144': u'Y', # TURNED SANS-SERIF CAPITAL Y
+    u'\u2145': u'D', # DOUBLE-STRUCK ITALIC CAPITAL D
+    u'\u2146': u'd', # DOUBLE-STRUCK ITALIC SMALL D
+    u'\u2147': u'e', # DOUBLE-STRUCK ITALIC SMALL E
+    u'\u2148': u'i', # DOUBLE-STRUCK ITALIC SMALL I
+    u'\u2149': u'j', # DOUBLE-STRUCK ITALIC SMALL J
+    u'\u214B': u'&', # TURNED AMPERSAND
+    u'\u2153': u'1/3', # VULGAR FRACTION ONE THIRD
+    u'\u2154': u'2/3', # VULGAR FRACTION TWO THIRDS
+    u'\u2155': u'1/5', # VULGAR FRACTION ONE FIFTH
+    u'\u2156': u'2/5', # VULGAR FRACTION TWO FIFTHS
+    u'\u2157': u'3/5', # VULGAR FRACTION THREE FIFTHS
+    u'\u2158': u'4/5', # VULGAR FRACTION FOUR FIFTHS
+    u'\u2159': u'1/6', # VULGAR FRACTION ONE SIXTH
+    u'\u215A': u'5/6', # VULGAR FRACTION FIVE SIXTHS
+    u'\u215B': u'1/8', # VULGAR FRACTION ONE EIGHTH
+    u'\u215C': u'3/8', # VULGAR FRACTION THREE EIGHTHS
+    u'\u215D': u'5/8', # VULGAR FRACTION FIVE EIGHTHS
+    u'\u215E': u'7/8', # VULGAR FRACTION SEVEN EIGHTHS
+    u'\u215F': u'1/', # FRACTION NUMERATOR ONE
+    u'\u2160': u'I', # ROMAN NUMERAL ONE
+    u'\u2161': u'II', # ROMAN NUMERAL TWO
+    u'\u2162': u'III', # ROMAN NUMERAL THREE
+    u'\u2163': u'IV', # ROMAN NUMERAL FOUR
+    u'\u2164': u'V', # ROMAN NUMERAL FIVE
+    u'\u2165': u'VI', # ROMAN NUMERAL SIX
+    u'\u2166': u'VII', # ROMAN NUMERAL SEVEN
+    u'\u2167': u'VIII', # ROMAN NUMERAL EIGHT
+    u'\u2168': u'IX', # ROMAN NUMERAL NINE
+    u'\u2169': u'X', # ROMAN NUMERAL TEN
+    u'\u216A': u'XI', # ROMAN NUMERAL ELEVEN
+    u'\u216B': u'XII', # ROMAN NUMERAL TWELVE
+    u'\u216C': u'L', # ROMAN NUMERAL FIFTY
+    u'\u216D': u'C', # ROMAN NUMERAL ONE HUNDRED
+    u'\u216E': u'D', # ROMAN NUMERAL FIVE HUNDRED
+    u'\u216F': u'M', # ROMAN NUMERAL ONE THOUSAND
+    u'\u2170': u'i', # SMALL ROMAN NUMERAL ONE
+    u'\u2171': u'ii', # SMALL ROMAN NUMERAL TWO
+    u'\u2172': u'iii', # SMALL ROMAN NUMERAL THREE
+    u'\u2173': u'iv', # SMALL ROMAN NUMERAL FOUR
+    u'\u2174': u'v', # SMALL ROMAN NUMERAL FIVE
+    u'\u2175': u'vi', # SMALL ROMAN NUMERAL SIX
+    u'\u2176': u'vii', # SMALL ROMAN NUMERAL SEVEN
+    u'\u2177': u'viii', # SMALL ROMAN NUMERAL EIGHT
+    u'\u2178': u'ix', # SMALL ROMAN NUMERAL NINE
+    u'\u2179': u'x', # SMALL ROMAN NUMERAL TEN
+    u'\u217A': u'xi', # SMALL ROMAN NUMERAL ELEVEN
+    u'\u217B': u'xii', # SMALL ROMAN NUMERAL TWELVE
+    u'\u217C': u'l', # SMALL ROMAN NUMERAL FIFTY
+    u'\u217D': u'c', # SMALL ROMAN NUMERAL ONE HUNDRED
+    u'\u217E': u'd', # SMALL ROMAN NUMERAL FIVE HUNDRED
+    u'\u217F': u'm', # SMALL ROMAN NUMERAL ONE THOUSAND
+    u'\u2180': u'CD', # ROMAN NUMERAL ONE THOUSAND C D
+    u'\u2190': u'<-', # LEFTWARDS ARROW
+    u'\u2192': u'->', # RIGHTWARDS ARROW
+    u'\u2194': u'<->', # LEFT RIGHT ARROW
+    u'\u219A': u'<-', # LEFTWARDS ARROW WITH STROKE
+    u'\u219B': u'->', # RIGHTWARDS ARROW WITH STROKE
+    u'\u21AE': u'<->', # LEFT RIGHT ARROW WITH STROKE
+    u'\u21CD': u'<=', # LEFTWARDS DOUBLE ARROW WITH STROKE
+    u'\u21CE': u'<=>', # LEFT RIGHT DOUBLE ARROW WITH STROKE
+    u'\u21CF': u'=>', # RIGHTWARDS DOUBLE ARROW WITH STROKE
+    u'\u21D0': u'<=', # LEFTWARDS DOUBLE ARROW
+    u'\u21D2': u'=>', # RIGHTWARDS DOUBLE ARROW
+    u'\u21D4': u'<=>', # LEFT RIGHT DOUBLE ARROW
+    u'\u2303': u'^', # UP ARROWHEAD
+    u'\u2329': u'<', # LEFT-POINTING ANGLE BRACKET
+    u'\u232A': u'>', # RIGHT-POINTING ANGLE BRACKET
+    u'\u239B': u'(', # LEFT PARENTHESIS UPPER HOOK
+    u'\u239C': u'(', # LEFT PARENTHESIS EXTENSION
+    u'\u239D': u'(', # LEFT PARENTHESIS LOWER HOOK
+    u'\u239E': u')', # RIGHT PARENTHESIS UPPER HOOK
+    u'\u239F': u')', # RIGHT PARENTHESIS EXTENSION
+    u'\u23A0': u')', # RIGHT PARENTHESIS LOWER HOOK
+    u'\u23A1': u'[', # LEFT SQUARE BRACKET UPPER CORNER
+    u'\u23A2': u'[', # LEFT SQUARE BRACKET EXTENSION
+    u'\u23A3': u'[', # LEFT SQUARE BRACKET LOWER CORNER
+    u'\u23A4': u']', # RIGHT SQUARE BRACKET UPPER CORNER
+    u'\u23A5': u']', # RIGHT SQUARE BRACKET EXTENSION
+    u'\u23A6': u']', # RIGHT SQUARE BRACKET LOWER CORNER
+    u'\u23A7': u'{', # LEFT CURLY BRACKET UPPER HOOK
+    u'\u23A8': u'{', # LEFT CURLY BRACKET MIDDLE PIECE
+    u'\u23A9': u'{', # LEFT CURLY BRACKET LOWER HOOK
+    u'\u23AB': u'}', # RIGHT CURLY BRACKET UPPER HOOK
+    u'\u23AC': u'}', # RIGHT CURLY BRACKET MIDDLE PIECE
+    u'\u23AD': u'}', # RIGHT CURLY BRACKET LOWER HOOK
+    u'\u2460': u'1', # CIRCLED DIGIT ONE
+    u'\u2461': u'2', # CIRCLED DIGIT TWO
+    u'\u2462': u'3', # CIRCLED DIGIT THREE
+    u'\u2463': u'4', # CIRCLED DIGIT FOUR
+    u'\u2464': u'5', # CIRCLED DIGIT FIVE
+    u'\u2465': u'6', # CIRCLED DIGIT SIX
+    u'\u2466': u'7', # CIRCLED DIGIT SEVEN
+    u'\u2467': u'8', # CIRCLED DIGIT EIGHT
+    u'\u2468': u'9', # CIRCLED DIGIT NINE
+    u'\u2469': u'10', # CIRCLED NUMBER TEN
+    u'\u246A': u'11', # CIRCLED NUMBER ELEVEN
+    u'\u246B': u'12', # CIRCLED NUMBER TWELVE
+    u'\u246C': u'13', # CIRCLED NUMBER THIRTEEN
+    u'\u246D': u'14', # CIRCLED NUMBER FOURTEEN
+    u'\u246E': u'15', # CIRCLED NUMBER FIFTEEN
+    u'\u246F': u'16', # CIRCLED NUMBER SIXTEEN
+    u'\u2470': u'17', # CIRCLED NUMBER SEVENTEEN
+    u'\u2471': u'18', # CIRCLED NUMBER EIGHTEEN
+    u'\u2472': u'19', # CIRCLED NUMBER NINETEEN
+    u'\u2473': u'20', # CIRCLED NUMBER TWENTY
+    u'\u2474': u'(1)', # PARENTHESIZED DIGIT ONE
+    u'\u2475': u'(2)', # PARENTHESIZED DIGIT TWO
+    u'\u2476': u'(3)', # PARENTHESIZED DIGIT THREE
+    u'\u2477': u'(4)', # PARENTHESIZED DIGIT FOUR
+    u'\u2478': u'(5)', # PARENTHESIZED DIGIT FIVE
+    u'\u2479': u'(6)', # PARENTHESIZED DIGIT SIX
+    u'\u247A': u'(7)', # PARENTHESIZED DIGIT SEVEN
+    u'\u247B': u'(8)', # PARENTHESIZED DIGIT EIGHT
+    u'\u247C': u'(9)', # PARENTHESIZED DIGIT NINE
+    u'\u247D': u'(10)', # PARENTHESIZED NUMBER TEN
+    u'\u247E': u'(11)', # PARENTHESIZED NUMBER ELEVEN
+    u'\u247F': u'(12)', # PARENTHESIZED NUMBER TWELVE
+    u'\u2480': u'(13)', # PARENTHESIZED NUMBER THIRTEEN
+    u'\u2481': u'(14)', # PARENTHESIZED NUMBER FOURTEEN
+    u'\u2482': u'(15)', # PARENTHESIZED NUMBER FIFTEEN
+    u'\u2483': u'(16)', # PARENTHESIZED NUMBER SIXTEEN
+    u'\u2484': u'(17)', # PARENTHESIZED NUMBER SEVENTEEN
+    u'\u2485': u'(18)', # PARENTHESIZED NUMBER EIGHTEEN
+    u'\u2486': u'(19)', # PARENTHESIZED NUMBER NINETEEN
+    u'\u2487': u'(20)', # PARENTHESIZED NUMBER TWENTY
+    u'\u2488': u'1.', # DIGIT ONE FULL STOP
+    u'\u2489': u'2.', # DIGIT TWO FULL STOP
+    u'\u248A': u'3.', # DIGIT THREE FULL STOP
+    u'\u248B': u'4.', # DIGIT FOUR FULL STOP
+    u'\u248C': u'5.', # DIGIT FIVE FULL STOP
+    u'\u248D': u'6.', # DIGIT SIX FULL STOP
+    u'\u248E': u'7.', # DIGIT SEVEN FULL STOP
+    u'\u248F': u'8.', # DIGIT EIGHT FULL STOP
+    u'\u2490': u'9.', # DIGIT NINE FULL STOP
+    u'\u2491': u'10.', # NUMBER TEN FULL STOP
+    u'\u2492': u'11.', # NUMBER ELEVEN FULL STOP
+    u'\u2493': u'12.', # NUMBER TWELVE FULL STOP
+    u'\u2494': u'13.', # NUMBER THIRTEEN FULL STOP
+    u'\u2495': u'14.', # NUMBER FOURTEEN FULL STOP
+    u'\u2496': u'15.', # NUMBER FIFTEEN FULL STOP
+    u'\u2497': u'16.', # NUMBER SIXTEEN FULL STOP
+    u'\u2498': u'17.', # NUMBER SEVENTEEN FULL STOP
+    u'\u2499': u'18.', # NUMBER EIGHTEEN FULL STOP
+    u'\u249A': u'19.', # NUMBER NINETEEN FULL STOP
+    u'\u249B': u'20.', # NUMBER TWENTY FULL STOP
+    u'\u249C': u'(a)', # PARENTHESIZED LATIN SMALL LETTER A
+    u'\u249D': u'(b)', # PARENTHESIZED LATIN SMALL LETTER B
+    u'\u249E': u'(c)', # PARENTHESIZED LATIN SMALL LETTER C
+    u'\u249F': u'(d)', # PARENTHESIZED LATIN SMALL LETTER D
+    u'\u24A0': u'(e)', # PARENTHESIZED LATIN SMALL LETTER E
+    u'\u24A1': u'(f)', # PARENTHESIZED LATIN SMALL LETTER F
+    u'\u24A2': u'(g)', # PARENTHESIZED LATIN SMALL LETTER G
+    u'\u24A3': u'(h)', # PARENTHESIZED LATIN SMALL LETTER H
+    u'\u24A4': u'(i)', # PARENTHESIZED LATIN SMALL LETTER I
+    u'\u24A5': u'(j)', # PARENTHESIZED LATIN SMALL LETTER J
+    u'\u24A6': u'(k)', # PARENTHESIZED LATIN SMALL LETTER K
+    u'\u24A7': u'(l)', # PARENTHESIZED LATIN SMALL LETTER L
+    u'\u24A8': u'(m)', # PARENTHESIZED LATIN SMALL LETTER M
+    u'\u24A9': u'(n)', # PARENTHESIZED LATIN SMALL LETTER N
+    u'\u24AA': u'(o)', # PARENTHESIZED LATIN SMALL LETTER O
+    u'\u24AB': u'(p)', # PARENTHESIZED LATIN SMALL LETTER P
+    u'\u24AC': u'(q)', # PARENTHESIZED LATIN SMALL LETTER Q
+    u'\u24AD': u'(r)', # PARENTHESIZED LATIN SMALL LETTER R
+    u'\u24AE': u'(s)', # PARENTHESIZED LATIN SMALL LETTER S
+    u'\u24AF': u'(t)', # PARENTHESIZED LATIN SMALL LETTER T
+    u'\u24B0': u'(u)', # PARENTHESIZED LATIN SMALL LETTER U
+    u'\u24B1': u'(v)', # PARENTHESIZED LATIN SMALL LETTER V
+    u'\u24B2': u'(w)', # PARENTHESIZED LATIN SMALL LETTER W
+    u'\u24B3': u'(x)', # PARENTHESIZED LATIN SMALL LETTER X
+    u'\u24B4': u'(y)', # PARENTHESIZED LATIN SMALL LETTER Y
+    u'\u24B5': u'(z)', # PARENTHESIZED LATIN SMALL LETTER Z
+    u'\u24B6': u'A', # CIRCLED LATIN CAPITAL LETTER A
+    u'\u24B7': u'B', # CIRCLED LATIN CAPITAL LETTER B
+    u'\u24B8': u'C', # CIRCLED LATIN CAPITAL LETTER C
+    u'\u24B9': u'D', # CIRCLED LATIN CAPITAL LETTER D
+    u'\u24BA': u'E', # CIRCLED LATIN CAPITAL LETTER E
+    u'\u24BB': u'F', # CIRCLED LATIN CAPITAL LETTER F
+    u'\u24BC': u'G', # CIRCLED LATIN CAPITAL LETTER G
+    u'\u24BD': u'H', # CIRCLED LATIN CAPITAL LETTER H
+    u'\u24BE': u'I', # CIRCLED LATIN CAPITAL LETTER I
+    u'\u24BF': u'J', # CIRCLED LATIN CAPITAL LETTER J
+    u'\u24C0': u'K', # CIRCLED LATIN CAPITAL LETTER K
+    u'\u24C1': u'L', # CIRCLED LATIN CAPITAL LETTER L
+    u'\u24C2': u'M', # CIRCLED LATIN CAPITAL LETTER M
+    u'\u24C3': u'N', # CIRCLED LATIN CAPITAL LETTER N
+    u'\u24C4': u'O', # CIRCLED LATIN CAPITAL LETTER O
+    u'\u24C5': u'P', # CIRCLED LATIN CAPITAL LETTER P
+    u'\u24C6': u'Q', # CIRCLED LATIN CAPITAL LETTER Q
+    u'\u24C7': u'R', # CIRCLED LATIN CAPITAL LETTER R
+    u'\u24C8': u'S', # CIRCLED LATIN CAPITAL LETTER S
+    u'\u24C9': u'T', # CIRCLED LATIN CAPITAL LETTER T
+    u'\u24CA': u'U', # CIRCLED LATIN CAPITAL LETTER U
+    u'\u24CB': u'V', # CIRCLED LATIN CAPITAL LETTER V
+    u'\u24CC': u'W', # CIRCLED LATIN CAPITAL LETTER W
+    u'\u24CD': u'X', # CIRCLED LATIN CAPITAL LETTER X
+    u'\u24CE': u'Y', # CIRCLED LATIN CAPITAL LETTER Y
+    u'\u24CF': u'Z', # CIRCLED LATIN CAPITAL LETTER Z
+    u'\u24D0': u'a', # CIRCLED LATIN SMALL LETTER A
+    u'\u24D1': u'b', # CIRCLED LATIN SMALL LETTER B
+    u'\u24D2': u'c', # CIRCLED LATIN SMALL LETTER C
+    u'\u24D3': u'd', # CIRCLED LATIN SMALL LETTER D
+    u'\u24D4': u'e', # CIRCLED LATIN SMALL LETTER E
+    u'\u24D5': u'f', # CIRCLED LATIN SMALL LETTER F
+    u'\u24D6': u'g', # CIRCLED LATIN SMALL LETTER G
+    u'\u24D7': u'h', # CIRCLED LATIN SMALL LETTER H
+    u'\u24D8': u'i', # CIRCLED LATIN SMALL LETTER I
+    u'\u24D9': u'j', # CIRCLED LATIN SMALL LETTER J
+    u'\u24DA': u'k', # CIRCLED LATIN SMALL LETTER K
+    u'\u24DB': u'l', # CIRCLED LATIN SMALL LETTER L
+    u'\u24DC': u'm', # CIRCLED LATIN SMALL LETTER M
+    u'\u24DD': u'n', # CIRCLED LATIN SMALL LETTER N
+    u'\u24DE': u'o', # CIRCLED LATIN SMALL LETTER O
+    u'\u24DF': u'p', # CIRCLED LATIN SMALL LETTER P
+    u'\u24E0': u'q', # CIRCLED LATIN SMALL LETTER Q
+    u'\u24E1': u'r', # CIRCLED LATIN SMALL LETTER R
+    u'\u24E2': u's', # CIRCLED LATIN SMALL LETTER S
+    u'\u24E3': u't', # CIRCLED LATIN SMALL LETTER T
+    u'\u24E4': u'u', # CIRCLED LATIN SMALL LETTER U
+    u'\u24E5': u'v', # CIRCLED LATIN SMALL LETTER V
+    u'\u24E6': u'w', # CIRCLED LATIN SMALL LETTER W
+    u'\u24E7': u'x', # CIRCLED LATIN SMALL LETTER X
+    u'\u24E8': u'y', # CIRCLED LATIN SMALL LETTER Y
+    u'\u24E9': u'z', # CIRCLED LATIN SMALL LETTER Z
+    u'\u24EA': u'0', # CIRCLED DIGIT ZERO
+    u'\u24EB': u'(11)', # NEGATIVE CIRCLED NUMBER ELEVEN
+    u'\u24EC': u'(12)', # NEGATIVE CIRCLED NUMBER TWELVE
+    u'\u24ED': u'(13)', # NEGATIVE CIRCLED NUMBER THIRTEEN
+    u'\u24EE': u'(14)', # NEGATIVE CIRCLED NUMBER FOURTEEN
+    u'\u24EF': u'(15)', # NEGATIVE CIRCLED NUMBER FIFTEEN
+    u'\u24F0': u'(16)', # NEGATIVE CIRCLED NUMBER SIXTEEN
+    u'\u24F1': u'(17)', # NEGATIVE CIRCLED NUMBER SEVENTEEN
+    u'\u24F2': u'(18)', # NEGATIVE CIRCLED NUMBER EIGHTEEN
+    u'\u24F3': u'(19)', # NEGATIVE CIRCLED NUMBER NINETEEN
+    u'\u24F4': u'(20)', # NEGATIVE CIRCLED NUMBER TWENTY
+    u'\u24F5': u'(1)', # DOUBLE CIRCLED DIGIT ONE
+    u'\u24F6': u'(2)', # DOUBLE CIRCLED DIGIT TWO
+    u'\u24F7': u'(3)', # DOUBLE CIRCLED DIGIT THREE
+    u'\u24F8': u'(4)', # DOUBLE CIRCLED DIGIT FOUR
+    u'\u24F9': u'(5)', # DOUBLE CIRCLED DIGIT FIVE
+    u'\u24FA': u'(6)', # DOUBLE CIRCLED DIGIT SIX
+    u'\u24FB': u'(7)', # DOUBLE CIRCLED DIGIT SEVEN
+    u'\u24FC': u'(8)', # DOUBLE CIRCLED DIGIT EIGHT
+    u'\u24FD': u'(9)', # DOUBLE CIRCLED DIGIT NINE
+    u'\u24FE': u'(10)', # DOUBLE CIRCLED NUMBER TEN
+    u'\u24FF': u'(0)', # NEGATIVE CIRCLED DIGIT ZERO
+    u'\u3000': u' ', # IDEOGRAPHIC SPACE
+    u'\u3001': u',', # IDEOGRAPHIC COMMA
+    u'\u3003': u'"', # DITTO MARK
+    u'\u3007': u'0', # IDEOGRAPHIC NUMBER ZERO
+    u'\u3008': u'<', # LEFT ANGLE BRACKET
+    u'\u3009': u'>', # RIGHT ANGLE BRACKET
+    u'\u300A': u'<<', # LEFT DOUBLE ANGLE BRACKET
+    u'\u300B': u'>>', # RIGHT DOUBLE ANGLE BRACKET
+    u'\u301B': u']', # RIGHT WHITE SQUARE BRACKET
+    u'\u301C': u'~', # WAVE DASH
+    u'\u301D': u'"', # REVERSED DOUBLE PRIME QUOTATION MARK
+    u'\u301E': u'"', # DOUBLE PRIME QUOTATION MARK
+    u'\u3021': u'1', # HANGZHOU NUMERAL ONE
+    u'\u3022': u'2', # HANGZHOU NUMERAL TWO
+    u'\u3023': u'3', # HANGZHOU NUMERAL THREE
+    u'\u3024': u'4', # HANGZHOU NUMERAL FOUR
+    u'\u3025': u'5', # HANGZHOU NUMERAL FIVE
+    u'\u3026': u'6', # HANGZHOU NUMERAL SIX
+    u'\u3027': u'7', # HANGZHOU NUMERAL SEVEN
+    u'\u3028': u'8', # HANGZHOU NUMERAL EIGHT
+    u'\u3029': u'9', # HANGZHOU NUMERAL NINE
+    u'\uFB00': u'ff', # LATIN SMALL LIGATURE FF
+    u'\uFB01': u'fi', # LATIN SMALL LIGATURE FI
+    u'\uFB02': u'fl', # LATIN SMALL LIGATURE FL
+    u'\uFB03': u'ffi', # LATIN SMALL LIGATURE FFI
+    u'\uFB04': u'ffl', # LATIN SMALL LIGATURE FFL
+    u'\uFB05': u'st', # LATIN SMALL LIGATURE LONG S T
+    u'\uFB06': u'st', # LATIN SMALL LIGATURE ST
+    u'\uFB29': u'+', # HEBREW LETTER ALTERNATIVE PLUS SIGN
+    u'\uFE50': u',', # SMALL COMMA
+    u'\uFE51': u',', # SMALL IDEOGRAPHIC COMMA
+    u'\uFE52': u'.', # SMALL FULL STOP
+    u'\uFE54': u';', # SMALL SEMICOLON
+    u'\uFE55': u':', # SMALL COLON
+    u'\uFE56': u'?', # SMALL QUESTION MARK
+    u'\uFE57': u'!', # SMALL EXCLAMATION MARK
+    u'\uFE58': u'-', # SMALL EM DASH
+    u'\uFE59': u'(', # SMALL LEFT PARENTHESIS
+    u'\uFE5A': u')', # SMALL RIGHT PARENTHESIS
+    u'\uFE5B': u'{', # SMALL LEFT CURLY BRACKET
+    u'\uFE5C': u'}', # SMALL RIGHT CURLY BRACKET
+    u'\uFE5D': u'(', # SMALL LEFT TORTOISE SHELL BRACKET
+    u'\uFE5E': u')', # SMALL RIGHT TORTOISE SHELL BRACKET
+    u'\uFE5F': u'#', # SMALL NUMBER SIGN
+    u'\uFE60': u'&', # SMALL AMPERSAND
+    u'\uFE61': u'*', # SMALL ASTERISK
+    u'\uFE62': u'+', # SMALL PLUS SIGN
+    u'\uFE63': u'-', # SMALL HYPHEN-MINUS
+    u'\uFE64': u'<', # SMALL LESS-THAN SIGN
+    u'\uFE65': u'>', # SMALL GREATER-THAN SIGN
+    u'\uFE66': u'=', # SMALL EQUALS SIGN
+    u'\uFE67': u'![null]!', # null
+    u'\uFE68': u'\\', # SMALL REVERSE SOLIDUS
+    u'\uFE69': u'$', # SMALL DOLLAR SIGN
+    u'\uFE6A': u'%', # SMALL PERCENT SIGN
+    u'\uFE6B': u'@', # SMALL COMMERCIAL AT
+    u'\uFF00': u'![null]!', # null
+    u'\uFF01': u'!', # FULLWIDTH EXCLAMATION MARK
+    u'\uFF02': u'"', # FULLWIDTH QUOTATION MARK
+    u'\uFF03': u'#', # FULLWIDTH NUMBER SIGN
+    u'\uFF04': u'$', # FULLWIDTH DOLLAR SIGN
+    u'\uFF05': u'%', # FULLWIDTH PERCENT SIGN
+    u'\uFF06': u'&', # FULLWIDTH AMPERSAND
+    u'\uFF07': u"'", # FULLWIDTH APOSTROPHE
+    u'\uFF08': u'(', # FULLWIDTH LEFT PARENTHESIS
+    u'\uFF09': u')', # FULLWIDTH RIGHT PARENTHESIS
+    u'\uFF0A': u'*', # FULLWIDTH ASTERISK
+    u'\uFF0B': u'+', # FULLWIDTH PLUS SIGN
+    u'\uFF0C': u',', # FULLWIDTH COMMA
+    u'\uFF0D': u'-', # FULLWIDTH HYPHEN-MINUS
+    u'\uFF0E': u'.', # FULLWIDTH FULL STOP
+    u'\uFF0F': u'/', # FULLWIDTH SOLIDUS
+    u'\uFF10': u'0', # FULLWIDTH DIGIT ZERO
+    u'\uFF11': u'1', # FULLWIDTH DIGIT ONE
+    u'\uFF12': u'2', # FULLWIDTH DIGIT TWO
+    u'\uFF13': u'3', # FULLWIDTH DIGIT THREE
+    u'\uFF14': u'4', # FULLWIDTH DIGIT FOUR
+    u'\uFF15': u'5', # FULLWIDTH DIGIT FIVE
+    u'\uFF16': u'6', # FULLWIDTH DIGIT SIX
+    u'\uFF17': u'7', # FULLWIDTH DIGIT SEVEN
+    u'\uFF18': u'8', # FULLWIDTH DIGIT EIGHT
+    u'\uFF19': u'9', # FULLWIDTH DIGIT NINE
+    u'\uFF1A': u':', # FULLWIDTH COLON
+    u'\uFF1B': u';', # FULLWIDTH SEMICOLON
+    u'\uFF1C': u'<', # FULLWIDTH LESS-THAN SIGN
+    u'\uFF1D': u'=', # FULLWIDTH EQUALS SIGN
+    u'\uFF1E': u'>', # FULLWIDTH GREATER-THAN SIGN
+    u'\uFF1F': u'?', # FULLWIDTH QUESTION MARK
+    u'\uFF20': u'@', # FULLWIDTH COMMERCIAL AT
+    u'\uFF21': u'A', # FULLWIDTH LATIN CAPITAL LETTER A
+    u'\uFF22': u'B', # FULLWIDTH LATIN CAPITAL LETTER B
+    u'\uFF23': u'C', # FULLWIDTH LATIN CAPITAL LETTER C
+    u'\uFF24': u'D', # FULLWIDTH LATIN CAPITAL LETTER D
+    u'\uFF25': u'E', # FULLWIDTH LATIN CAPITAL LETTER E
+    u'\uFF26': u'F', # FULLWIDTH LATIN CAPITAL LETTER F
+    u'\uFF27': u'G', # FULLWIDTH LATIN CAPITAL LETTER G
+    u'\uFF28': u'H', # FULLWIDTH LATIN CAPITAL LETTER H
+    u'\uFF29': u'I', # FULLWIDTH LATIN CAPITAL LETTER I
+    u'\uFF2A': u'J', # FULLWIDTH LATIN CAPITAL LETTER J
+    u'\uFF2B': u'K', # FULLWIDTH LATIN CAPITAL LETTER K
+    u'\uFF2C': u'L', # FULLWIDTH LATIN CAPITAL LETTER L
+    u'\uFF2D': u'M', # FULLWIDTH LATIN CAPITAL LETTER M
+    u'\uFF2E': u'N', # FULLWIDTH LATIN CAPITAL LETTER N
+    u'\uFF2F': u'O', # FULLWIDTH LATIN CAPITAL LETTER O
+    u'\uFF30': u'P', # FULLWIDTH LATIN CAPITAL LETTER P
+    u'\uFF31': u'Q', # FULLWIDTH LATIN CAPITAL LETTER Q
+    u'\uFF32': u'R', # FULLWIDTH LATIN CAPITAL LETTER R
+    u'\uFF33': u'S', # FULLWIDTH LATIN CAPITAL LETTER S
+    u'\uFF34': u'T', # FULLWIDTH LATIN CAPITAL LETTER T
+    u'\uFF35': u'U', # FULLWIDTH LATIN CAPITAL LETTER U
+    u'\uFF36': u'V', # FULLWIDTH LATIN CAPITAL LETTER V
+    u'\uFF37': u'W', # FULLWIDTH LATIN CAPITAL LETTER W
+    u'\uFF38': u'X', # FULLWIDTH LATIN CAPITAL LETTER X
+    u'\uFF39': u'Y', # FULLWIDTH LATIN CAPITAL LETTER Y
+    u'\uFF3A': u'Z', # FULLWIDTH LATIN CAPITAL LETTER Z
+    u'\uFF3B': u'[', # FULLWIDTH LEFT SQUARE BRACKET
+    u'\uFF3C': u'\\', # FULLWIDTH REVERSE SOLIDUS
+    u'\uFF3D': u']', # FULLWIDTH RIGHT SQUARE BRACKET
+    u'\uFF3E': u'^', # FULLWIDTH CIRCUMFLEX ACCENT
+    u'\uFF3F': u'_', # FULLWIDTH LOW LINE
+    u'\uFF40': u'`', # FULLWIDTH GRAVE ACCENT
+    u'\uFF41': u'a', # FULLWIDTH LATIN SMALL LETTER A
+    u'\uFF42': u'b', # FULLWIDTH LATIN SMALL LETTER B
+    u'\uFF43': u'c', # FULLWIDTH LATIN SMALL LETTER C
+    u'\uFF44': u'd', # FULLWIDTH LATIN SMALL LETTER D
+    u'\uFF45': u'e', # FULLWIDTH LATIN SMALL LETTER E
+    u'\uFF46': u'f', # FULLWIDTH LATIN SMALL LETTER F
+    u'\uFF47': u'g', # FULLWIDTH LATIN SMALL LETTER G
+    u'\uFF48': u'h', # FULLWIDTH LATIN SMALL LETTER H
+    u'\uFF49': u'i', # FULLWIDTH LATIN SMALL LETTER I
+    u'\uFF4A': u'j', # FULLWIDTH LATIN SMALL LETTER J
+    u'\uFF4B': u'k', # FULLWIDTH LATIN SMALL LETTER K
+    u'\uFF4C': u'l', # FULLWIDTH LATIN SMALL LETTER L
+    u'\uFF4D': u'm', # FULLWIDTH LATIN SMALL LETTER M
+    u'\uFF4E': u'n', # FULLWIDTH LATIN SMALL LETTER N
+    u'\uFF4F': u'o', # FULLWIDTH LATIN SMALL LETTER O
+    u'\uFF50': u'p', # FULLWIDTH LATIN SMALL LETTER P
+    u'\uFF51': u'q', # FULLWIDTH LATIN SMALL LETTER Q
+    u'\uFF52': u'r', # FULLWIDTH LATIN SMALL LETTER R
+    u'\uFF53': u's', # FULLWIDTH LATIN SMALL LETTER S
+    u'\uFF54': u't', # FULLWIDTH LATIN SMALL LETTER T
+    u'\uFF55': u'u', # FULLWIDTH LATIN SMALL LETTER U
+    u'\uFF56': u'v', # FULLWIDTH LATIN SMALL LETTER V
+    u'\uFF57': u'w', # FULLWIDTH LATIN SMALL LETTER W
+    u'\uFF58': u'x', # FULLWIDTH LATIN SMALL LETTER X
+    u'\uFF59': u'y', # FULLWIDTH LATIN SMALL LETTER Y
+    u'\uFF5A': u'z', # FULLWIDTH LATIN SMALL LETTER Z
+    u'\uFF5B': u'{', # FULLWIDTH LEFT CURLY BRACKET
+    u'\uFF5C': u'', # FULLWIDTH VERTICAL LINE
+    u'\uFF5D': u'}', # FULLWIDTH RIGHT CURLY BRACKET
+    u'\uFF5E': u'~', # FULLWIDTH TILDE
+    u'\uFF5F': u'(', # FULLWIDTH LEFT WHITE PARENTHESIS
+    u'\uFF60': u')', # FULLWIDTH RIGHT WHITE PARENTHESIS
+    u'\uFF64': u',', # HALFWIDTH IDEOGRAPHIC COMMA
+    u'\uFFE9': u'<-', # HALFWIDTH LEFTWARDS ARROW
+    u'\uFFEB': u'->', # HALFWIDTH RIGHTWARDS ARROW
+}
+
+
+
+
 
 substitution_table = {
     u'\u0020': u' ', # SPACE
