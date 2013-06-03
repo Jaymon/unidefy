@@ -2,6 +2,7 @@
 # http://docs.python.org/distutils/setupscript.html
 # http://docs.python.org/2/distutils/examples.html
 
+import ast
 import sys
 from setuptools import setup
 
