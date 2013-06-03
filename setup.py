@@ -2,8 +2,6 @@
 # http://docs.python.org/distutils/setupscript.html
 # http://docs.python.org/2/distutils/examples.html
 
-import ast
-import sys
 from setuptools import setup
 
 name = 'unidefy'
@@ -27,7 +25,7 @@ setup(
         'Intended Audience :: Developers',
         'License :: MIT',
         'Operating System :: OS Independent',
-        'Topic :: Debug',
-        ],
-    test_suite = "test_{}".format(name),
+        'Topic :: Debug'
+    ],
+    test_suite="test_{}".format(name),
 )
