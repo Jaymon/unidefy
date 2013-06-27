@@ -2,10 +2,21 @@
 # http://docs.python.org/distutils/setupscript.html
 # http://docs.python.org/2/distutils/examples.html
 
+import ast
+import sys
 from setuptools import setup
 
 name = 'unidefy'
-version = '0.2'
+version = ''
+with open('{}.py'.format(name), 'rU') as f:
+    for node in (n for n in ast.parse(f.read()).body if isinstance(n, ast.Assign)):
+        name = node.targets[0]
+        if isinstance(name, ast.Name) and name.id.startswith('__version__'):
+            version = node.value.s
+            break
+
+if not version:
+    raise RuntimeError('Unable to find version number')
 
 setup(
     name=name,
@@ -25,7 +36,8 @@ setup(
         'Intended Audience :: Developers',
         'License :: MIT',
         'Operating System :: OS Independent',
-        'Topic :: Debug'
-    ],
-    test_suite="test_{}".format(name),
+        'Topic :: Debug',
+        ],
+    test_suite = "test_{}".format(name),
 )
+
